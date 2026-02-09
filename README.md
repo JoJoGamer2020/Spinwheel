@@ -260,10 +260,10 @@ Then visit: `http://localhost:8000/spinwheel.html`
 ## 📊 File Structure
 
 ```
-/root/test/
+/home/
 ├── spinwheel.html    # Main application (complete, standalone)
 ├── index.html        # Redirect to spinwheel.html
-└── text.txt          # This README
+└── README.md          # This README
 ```
 
 ---
@@ -338,5 +338,3 @@ For issues or questions:
 ---
 
 **Enjoy spinning! 🎉**
-
-Made with ❤️ for decision-making fun!
