@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Wheel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.addEventListener('beforeunload', () => {
+            window.scrollTo(0, 0);
+        });
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #0a0a0a;
+            font-family: 'Poppins', sans-serif;
+            padding: 15px;
+            overflow-x: hidden;
+            width: 100%;
+            touch-action: manipulation;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+            animation: containerFadeIn 0.8s ease;
+        }
+
+        @keyframes containerFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            animation: leftFadeIn 0.6s ease 0.1s backwards;
+        }
+
+        @keyframes leftFadeIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 42px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            text-align: center;
+            margin-bottom: 10px;
+            word-break: break-word;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            animation: titleFadeIn 0.6s ease;
+        }
+
+        @keyframes titleFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin: 0 auto;
+            filter: drop-shadow(0 0 0 transparent);
+            transition: filter 0.3s;
+            -webkit-tap-highlight-color: transparent;
+            animation: wheelZoom 0.7s ease 0.2s backwards;
+        }
+
+        @keyframes wheelZoom {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .wheel-container:hover {
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+        }
+
+        @media (hover: none) {
+            .wheel-container:hover {
+                filter: drop-shadow(0 0 0 transparent);
+            }
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        canvas:hover {
+            transform: scale(1.01);
+        }
+
+        canvas.spinning {
+            box-shadow: 0 8px 40px rgba(255, 255, 255, 0.3);
+            transform: scale(1.02);
+            animation: spinGlow 0.5s ease-in-out infinite alternate;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes spinGlow {
+            from { box-shadow: 0 8px 40px rgba(255, 255, 255, 0.3); }
+            to { box-shadow: 0 8px 50px rgba(255, 255, 255, 0.5); }
+        }
+
+        @media (hover: none) {
+            canvas:hover {
+                transform: none;
+            }
+        }
+
+        .pointer {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #fff;
+            z-index: 10;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+            animation: pointerPulse 2s ease-in-out infinite, pointerDrop 0.5s ease 0.4s backwards;
+        }
+
+        @keyframes pointerPulse {
+            0%, 100% { filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6)); }
+            50% { filter: drop-shadow(0 4px 15px rgba(255,255,255,0.4)); }
+        }
+
+        @keyframes pointerDrop {
+            from { transform: translateX(-50%) translateY(-50px); opacity: 0; }
+            to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+
+        button {
+            padding: 14px 40px;
+            font-size: 16px;
+            font-weight: 800;
+            background: #fff;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            -webkit-tap-highlight-color: transparent;
+            animation: buttonSlideUp 0.5s ease 0.5s backwards;
+        }
+
+        @keyframes buttonSlideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        button:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        @media (hover: none) {
+            button:hover {
+                transform: none;
+                box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+            }
+            button:active {
+                transform: scale(0.98);
+                box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            background: #fff;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #fff;
+            min-height: 40px;
+            text-align: center;
+            letter-spacing: 1px;
+            animation: resultPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes resultPop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .right-section {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            animation: rightFadeIn 0.6s ease 0.3s backwards;
+        }
+
+        @keyframes rightFadeIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .right-section::-webkit-scrollbar {
+            display: none;
+        }
+
+        .right-section {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .right-section h2 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+            word-break: break-word;
+            transition: color 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .right-section:hover h2 {
+            color: #f0f0f0;
+        }
+
+        @media (hover: none) {
+            .right-section:hover h2 {
+                color: #fff;
+            }
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            animation: inputFadeIn 0.5s ease 0.2s backwards;
+        }
+
+        @keyframes inputFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            transition: color 0.2s;
+        }
+
+        input:hover::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #555;
+            transform: scale(1.02);
+            background: #111;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.05);
+        }
+
+        @media (hover: none) {
+            input:hover::placeholder {
+                color: rgba(255, 255, 255, 0.4);
+            }
+            input:focus {
+                transform: none;
+            }
+        }
+
+        .btn-small {
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            background: #fff;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-small:hover,
+        .btn-small:active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-small:active {
+            transform: scale(0.98);
+        }
+
+        @media (hover: none) {
+            .btn-small:hover {
+                transform: none;
+                box-shadow: none;
+            }
+        }
+
+        .choices-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            animation: listFadeIn 0.5s ease 0.4s backwards;
+        }
+
+        @keyframes listFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .choice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: transparent;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            word-break: break-word;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .choice-item span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .choice-item:hover,
+        .choice-item:active {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(3px);
+        }
+
+        .choice-item:active {
+            transform: scale(0.98);
+        }
+
+        @media (hover: none) {
+            .choice-item:hover {
+                background: transparent;
+                transform: none;
+            }
+        }
+
+        .btn-remove {
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            background: #ff4444;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-remove:hover,
+        .btn-remove:active {
+            transform: scale(1.05);
+            background: #ff6666;
+        }
+
+        .btn-remove:active {
+            transform: scale(0.95);
+        }
+
+        @media (hover: none) {
+            .btn-remove:hover {
+                transform: none;
+                background: #ff4444;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                max-width: 100%;
+            }
+
+            .wheel-container {
+                max-width: 280px;
+            }
+
+            h1 {
+                font-size: 28px;
+                text-align: center;
+            }
+
+            button {
+                padding: 14px 30px;
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+
+            #result {
+                font-size: 20px;
+            }
+
+            .right-section {
+                max-height: none;
+            }
+
+            .right-section h2 {
+                font-size: 20px;
+            }
+
+            .choice-item {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            input {
+                font-size: 14px;
+                padding: 10px 12px;
+            }
+
+            .btn-small {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            animation: confetti-fall 3s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.9;
+        }
+
+        @keyframes confetti-fall {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <h1>Spin the Wheel!</h1>
+            <div class="wheel-container">
+                <div class="pointer"></div>
+                <canvas id="wheel" width="800" height="800"></canvas>
+            </div>
+            <button id="spinBtn">SPIN</button>
+            <div id="result"></div>
+        </div>
+
+        <div class="right-section">
+            <h2>Manage Choices</h2>
+            <div class="input-group">
+                <input type="text" id="newChoice" placeholder="Add new choice..." maxlength="20">
+                <button class="btn-small" id="addBtn">Add</button>
+            </div>
+            <div class="choices-list" id="choicesList"></div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDiv = document.getElementById('result');
+        const newChoiceInput = document.getElementById('newChoice');
+        const addBtn = document.getElementById('addBtn');
+        const choicesList = document.getElementById('choicesList');
+
+        let segments = ['Prize 1', 'Prize 2', 'Prize 3', 'Prize 4', 'Prize 5', 'Prize 6', 'Prize 7', 'Prize 8'];
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2', '#F06292', '#AED581', '#FF8A80', '#82B1FF', '#B9F6CA', '#FFD180', '#FF80AB', '#EA80FC', '#80D8FF', '#CCFF90'];
+        
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        // Load saved choices
+        const saved = localStorage.getItem('wheelChoices');
+        if (saved) {
+            segments = JSON.parse(saved);
+        }
+
+        function saveChoices() {
+            localStorage.setItem('wheelChoices', JSON.stringify(segments));
+        }
+
+        let segmentColors = segments.map((_, i) => colors[i % colors.length]);
+
+        // Audio Context Setup
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTick() {
+            // Short high-pitched blip
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+
+        function playWin() {
+            // Simple winning chord (arpeggio)
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+        }
+
+        function updateChoicesList() {
+            choicesList.innerHTML = '';
+            segments.forEach((segment, index) => {
+                const item = document.createElement('div');
+                item.className = 'choice-item';
+                item.innerHTML = `
+                    <span>${segment}</span>
+                    <button class="btn-remove" onclick="removeChoice(${index})">Remove</button>
+                `;
+                choicesList.appendChild(item);
+            });
+            saveChoices();
+        }
+
+        function removeChoice(index) {
+            if (segments.length > 2) {
+                segments.splice(index, 1);
+                segmentColors = segments.map((_, i) => colors[i % colors.length]);
+                updateChoicesList();
+                drawWheel();
+            }
+        }
+
+        function addChoice() {
+            const value = newChoiceInput.value.trim();
+            if (value) {
+                segments.push(value);
+                segmentColors = segments.map((_, i) => colors[i % colors.length]);
+                newChoiceInput.value = '';
+                updateChoicesList();
+                drawWheel();
+            }
+        }
+
+        function createConfetti() {
+            const confettiColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#F7DC6F', '#BB8FCE', '#F06292'];
+            for (let i = 0; i < 150; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                    confetti.style.width = (5 + Math.random() * 10) + 'px';
+                    confetti.style.height = confetti.style.width;
+                    confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+                    confetti.style.transform = `translateX(${(Math.random() - 0.5) * 200}px) rotate(${Math.random() * 360}deg)`;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 15);
+            }
+        }
+
+        addBtn.addEventListener('click', addChoice);
+        newChoiceInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addChoice();
+        });
+
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 10;
+            const segmentAngle = (2 * Math.PI) / segments.length;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // High quality rendering
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+
+            segments.forEach((segment, i) => {
+                const startAngle = i * segmentAngle + currentRotation;
+                const endAngle = startAngle + segmentAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.fillStyle = segmentColors[i];
+                ctx.fill();
+                ctx.strokeStyle = '#1a1a1a';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + segmentAngle / 2);
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#fff';
+                // Increased font size for HiDPI
+                ctx.font = 'bold 32px Poppins, sans-serif';
+                // Text Shadow
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                
+                ctx.fillText(segment, radius / 1.5, 0);
+                ctx.restore();
+            });
+
+            // Center circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 30, 0, 2 * Math.PI);
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 10;
+            ctx.fill();
+            
+            // Inner ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            
+            // Resume Audio Context if needed (browser policy)
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            resultDiv.textContent = '';
+            canvas.classList.add('spinning');
+
+            const spinDuration = 4000;
+            const minSpins = 5;
+            const randomSpin = minSpins + Math.random() * 5;
+            const totalRotation = randomSpin * 2 * Math.PI;
+            const startTime = Date.now();
+            
+            let lastSegment = -1;
+
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+                // Ease out cubic
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+
+                currentRotation = easeOut * totalRotation;
+
+                // Calculate current segment for sound
+                const segmentAngle = (2 * Math.PI) / segments.length;
+                // We use modulo to get the rotation within one circle, then divide by angle
+                const currentSegment = Math.floor((currentRotation % (2 * Math.PI)) / segmentAngle);
+
+                // Play tick sound when changing segments (if not near end)
+                if (currentSegment !== lastSegment && progress < 0.95) {
+                    playTick();
+                    lastSegment = currentSegment;
+                }
+
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    const normalizedRotation = currentRotation % (2 * Math.PI);
+                    const pointerAngle = (Math.PI * 1.5) - normalizedRotation;
+                    // Normalize pointer angle to be positive
+                    const normalizedPointer = ((pointerAngle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+                    const winningIndex = Math.floor(normalizedPointer / segmentAngle) % segments.length;
+
+                    createConfetti();
+                    playWin();
+                    resultDiv.textContent = `🎉 ${segments[winningIndex]}`;
+                    resultDiv.style.animation = 'none';
+                    setTimeout(() => resultDiv.style.animation = 'resultPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)', 10);
+                    canvas.classList.remove('spinning');
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                }
+            }
+
+            animate();
+        }
+
+        spinBtn.addEventListener('click', spin);
+        updateChoicesList();
+        drawWheel();
+
+        // Scroll to top on load
+        window.addEventListener('load', () => {
+            setTimeout(() => window.scrollTo(0, 0), 0);
+        });
+    </script>
+</body>
+</html>
+
