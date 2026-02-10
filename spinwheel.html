@@ -413,7 +413,13 @@
             transition: all 0.2s;
             word-break: break-word;
             gap: 10px;
+            animation: slideIn 0.3s ease;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .choice-item span {
@@ -452,6 +458,7 @@
             transition: all 0.2s;
             flex-shrink: 0;
             -webkit-tap-highlight-color: transparent;
+            animation: none;
         }
 
         .btn-remove:hover,
