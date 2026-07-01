@@ -133,7 +133,7 @@ A modern, sleek, and fully-featured spin wheel application built with pure HTML,
 ## 📋 How to Use
 
 ### Basic Usage
-1. Open `spinwheel.html` in any modern web browser
+1. Open `index.html` in any modern web browser
 2. The wheel comes with 8 default prizes
 3. Click the **SPIN** button to spin the wheel
 4. Wait for the result with confetti celebration!
@@ -239,11 +239,11 @@ for (let i = 0; i < 150; i++) { // Change 150
 
 ## 🚀 Deployment
 
-### Local Hosting
-Simply open `spinwheel.html` in a browser - no server needed!
+### Local
+Simply open `index.html` in a browser - no server needed!
 
 ### Web Server
-Upload `spinwheel.html` to any web hosting:
+Upload `index.html` to any web hosting:
 - Works with GitHub Pages
 - Compatible with Netlify, Vercel
 - No build process required
@@ -253,7 +253,7 @@ Upload `spinwheel.html` to any web hosting:
 ```bash
 python3 -m http.server 8000
 ```
-Then visit: `http://localhost:8000/spinwheel.html`
+Then visit: `http://localhost:8000`
 
 ---
 
@@ -261,8 +261,7 @@ Then visit: `http://localhost:8000/spinwheel.html`
 
 ```
 /home/
-├── spinwheel.html    # Main application (complete, standalone)
-├── index.html        # Redirect to spinwheel.html
+├── index.html    # Main application
 └── README.md          # This README
 ```
 
